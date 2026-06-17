@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema Gestión de Pacientes IPS</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, sans-serif;
+}
+
+body{
+background:#f4f6f9;
+padding:20px;
+}
+
+.container{
+max-width:1200px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,.1);
+}
+
+h1{
+text-align:center;
+margin-bottom:20px;
+color:#0d6efd;
+}
+
+form{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+margin-bottom:20px;
+}
+
+input,select,textarea{
+padding:10px;
+border:1px solid #ccc;
+border-radius:5px;
+}
+
+textarea{
+grid-column:span 2;
+}
+
+button{
+padding:10px;
+border:none;
+cursor:pointer;
+border-radius:5px;
+}
+
+.btn-guardar{
+background:#198754;
+color:white;
+}
+
+.btn-limpiar{
+background:#6c757d;
+color:white;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+table th{
+background:#0d6efd;
+color:white;
+padding:10px;
+}
+
+table td{
+padding:10px;
+border-bottom:1px solid #ddd;
+}
+
+.editar{
+background:#ffc107;
+}
+
+.eliminar{
+background:#dc3545;
+color:white;
+}
+
+.busqueda{
+margin-bottom:15px;
+width:100%;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h1>Sistema Gestión de Pacientes IPS</h1>
+
+<input type="text" id="buscar" class="busqueda" placeholder="Buscar paciente...">
+
+<form id="formPaciente">
+
+<input type="hidden" id="id">
+
+<input type="text" id="documento" placeholder="Documento" required>
+
+<input type="text" id="nombre" placeholder="Nombre Completo" required>
+
+<input type="date" id="fechaNacimiento">
+
+<select id="genero">
+<option>Masculino</option>
+<option>Femenino</option>
+<option>Otro</option>
+</select>
+
+<input type="text" id="telefono" placeholder="Teléfono">
+
+<input type="email" id="correo" placeholder="Correo">
+
+<input type="text" id="direccion" placeholder="Dirección">
+
+<input type="text" id="eps" placeholder="EPS">
+
+<input type="text" id="tipoSangre" placeholder="Tipo de Sangre">
+
+<input type="text" id="alergias" placeholder="Alergias">
+
+<textarea id="observaciones" placeholder="Observaciones médicas"></textarea>
+
+<button type="submit" class="btn-guardar">
+Guardar Paciente
+</button>
+
+<button type="button" class="btn-limpiar" onclick="limpiarFormulario()">
+Limpiar
+</button>
+
+</form>
+
+<table>
+
+<thead>
+<tr>
+<th>Documento</th>
+<th>Nombre</th>
+<th>EPS</th>
+<th>Teléfono</th>
+<th>Acciones</th>
+</tr>
+</thead>
+
+<tbody id="tablaPacientes">
+</tbody>
+
+</table>
+
+</div>
+
+<script>
+
+let pacientes =
+JSON.parse(localStorage.getItem("pacientes")) || [];
+
+const formulario =
+document.getElementById("formPaciente");
+
+function guardarLocal(){
+localStorage.setItem(
+"pacientes",
+JSON.stringify(pacientes)
+);
+}
+
+function mostrarPacientes(){
+
+const tabla =
+document.getElementById("tablaPacientes");
+
+tabla.innerHTML="";
+
+pacientes.forEach((p,index)=>{
+
+tabla.innerHTML += `
+<tr>
+<td>${p.documento}</td>
+<td>${p.nombre}</td>
+<td>${p.eps}</td>
+<td>${p.telefono}</td>
+<td>
+<button class="editar"
+onclick="editarPaciente(${index})">
+Editar
+</button>
+
+<button class="eliminar"
+onclick="eliminarPaciente(${index})">
+Eliminar
+</button>
+</td>
+</tr>
+`;
+
+});
+
+}
+
+formulario.addEventListener("submit",(e)=>{
+
+e.preventDefault();
+
+const paciente={
+documento:document.getElementById("documento").value,
+nombre:document.getElementById("nombre").value,
+fechaNacimiento:document.getElementById("fechaNacimiento").value,
+genero:document.getElementById("genero").value,
+telefono:document.getElementById("telefono").value,
+correo:document.getElementById("correo").value,
+direccion:document.getElementById("direccion").value,
+eps:document.getElementById("eps").value,
+tipoSangre:document.getElementById("tipoSangre").value,
+alergias:document.getElementById("alergias").value,
+observaciones:document.getElementById("observaciones").value
+};
+
+let id =
+document.getElementById("id").value;
+
+if(id===""){
+pacientes.push(paciente);
+}else{
+pacientes[id]=paciente;
+}
+
+guardarLocal();
+mostrarPacientes();
+limpiarFormulario();
+
+});
+
+function editarPaciente(index){
+
+let p=pacientes[index];
+
+document.getElementById("id").value=index;
+document.getElementById("documento").value=p.documento;
+document.getElementById("nombre").value=p.nombre;
+document.getElementById("fechaNacimiento").value=p.fechaNacimiento;
+document.getElementById("genero").value=p.genero;
+document.getElementById("telefono").value=p.telefono;
+document.getElementById("correo").value=p.correo;
+document.getElementById("direccion").value=p.direccion;
+document.getElementById("eps").value=p.eps;
+document.getElementById("tipoSangre").value=p.tipoSangre;
+document.getElementById("alergias").value=p.alergias;
+document.getElementById("observaciones").value=p.observaciones;
+
+}
+
+function eliminarPaciente(index){
+
+if(confirm("¿Desea eliminar este paciente?")){
+
+pacientes.splice(index,1);
+
+guardarLocal();
+mostrarPacientes();
+
+}
+
+}
+
+function limpiarFormulario(){
+
+formulario.reset();
+document.getElementById("id").value="";
+
+}
+
+document.getElementById("buscar")
+.addEventListener("keyup",function(){
+
+const texto=this.value.toLowerCase();
+
+const filas=
+document.querySelectorAll("#tablaPacientes tr");
+
+filas.forEach(fila=>{
+
+const contenido=
+fila.textContent.toLowerCase();
+
+fila.style.display=
+contenido.includes(texto)
+? ""
+: "none";
+
+});
+
+});
+
+mostrarPacientes();
+
+</script>
+
+</body>
+</html>
